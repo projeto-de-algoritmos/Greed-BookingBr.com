@@ -17,3 +17,11 @@ func (b *Booking) getTime() float64 {
 func (b *Booking) units() float64 {
 	return b.getValue() / b.getTime()
 }
+
+func buildBookingOnline(names []string, values []float64, time []float64) []Booking {
+	booking := []Booking{}
+	for index, value := range values {
+		booking = append(booking, Booking{names[index], value, time[index]})
+	}
+	return booking
+}
