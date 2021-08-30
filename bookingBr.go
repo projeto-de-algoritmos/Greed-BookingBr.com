@@ -1,5 +1,7 @@
 package main
 
+import "sort"
+
 type Booking struct {
 	name  string
 	value float64 // Value in real
@@ -24,4 +26,39 @@ func buildBookingOnline(names []string, values []float64, time []float64) []Book
 		booking = append(booking, Booking{names[index], value, time[index]})
 	}
 	return booking
+}
+
+func glutton(items []Booking, maxTime float64, keyString string) ([]Booking, float64) {
+	var bookingCopy = make([]Booking, len(items))
+	copy(bookingCopy, items)
+
+	switch keyString {
+	case "value":
+		sort.Slice(bookingCopy, func(i, j int) bool {
+			return bookingCopy[i].getValue() > bookingCopy[j].getValue()
+		})
+
+	case "time":
+		sort.Slice(bookingCopy, func(i, j int) bool {
+			return (1 / bookingCopy[i].getTime()) > (1 / bookingCopy[j].getValue())
+		})
+	case "units":
+		sort.Slice(bookingCopy, func(i, j int) bool {
+			return bookingCopy[i].units() > bookingCopy[j].units()
+		})
+	}
+
+	result := []Booking{}
+	var totalValue float64
+	var totalTime float64
+	totalValue, totalTime = 0.0, 0.0
+	for i := 0; i < len(bookingCopy); i++ {
+		if totalTime+bookingCopy[i].getTime() <= maxTime {
+			result = append(result, bookingCopy[i])
+			totalTime += bookingCopy[i].getTime()
+			totalValue += bookingCopy[i].getValue()
+		}
+	}
+
+	return result, totalValue
 }
