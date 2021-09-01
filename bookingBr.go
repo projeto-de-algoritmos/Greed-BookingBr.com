@@ -1,11 +1,15 @@
 package main
 
-import "sort"
+import (
+	"flag"
+	"fmt"
+	"sort"
+)
 
 type Booking struct {
 	name  string
-	value float64 // Value in real
-	time  float64 // Time in seconds
+	value float64
+	time  float64
 }
 
 func (b *Booking) getValue() float64 {
@@ -16,11 +20,7 @@ func (b *Booking) getTime() float64 {
 	return b.time
 }
 
-func (b *Booking) units() float64 {
-	return b.getValue() / b.getTime()
-}
-
-func buildBookingOnline(names []string, values []float64, time []float64) []Booking {
+func BuildBookingOnline(names []string, values []float64, time []float64) []Booking {
 	booking := []Booking{}
 	for index, value := range values {
 		booking = append(booking, Booking{names[index], value, time[index]})
@@ -28,7 +28,7 @@ func buildBookingOnline(names []string, values []float64, time []float64) []Book
 	return booking
 }
 
-func glutton(items []Booking, maxTime float64, keyString string) ([]Booking, float64) {
+func Glutton(items []Booking, maxTime float64, keyString string) ([]Booking, float64) {
 	var bookingCopy = make([]Booking, len(items))
 	copy(bookingCopy, items)
 
@@ -40,11 +40,7 @@ func glutton(items []Booking, maxTime float64, keyString string) ([]Booking, flo
 
 	case "time":
 		sort.Slice(bookingCopy, func(i, j int) bool {
-			return (1 / bookingCopy[i].getTime()) > (1 / bookingCopy[j].getValue())
-		})
-	case "units":
-		sort.Slice(bookingCopy, func(i, j int) bool {
-			return bookingCopy[i].units() > bookingCopy[j].units()
+			return (1 / bookingCopy[i].getTime()) > (1 / bookingCopy[j].getTime())
 		})
 	}
 
@@ -60,5 +56,78 @@ func glutton(items []Booking, maxTime float64, keyString string) ([]Booking, flo
 		}
 	}
 
-	return result, totalValue
+	return result, totalTime
+}
+
+func RunGlutton(items []Booking, constraint float64, keyString string) {
+	taken, val := Glutton(items, constraint, keyString)
+	fmt.Println("Time available for booking =", constraint)
+	fmt.Println("Total time of all selected rooms =", val)
+	for idx := range taken {
+
+		fmt.Printf("	%s <%d, %d>\n", taken[idx].name, int32(taken[idx].value), int32(taken[idx].time))
+	}
+}
+
+func RunGluttons(booking []Booking, maxUnits float64) {
+	fmt.Printf("Use glutton by time to allocate %d rooms\n\n", int32(len(booking)))
+	RunGlutton(booking, maxUnits, "time")
+}
+
+/*
+1 dia = 1440 min
+1/2 dia = 2160 min
+2 dias = 2880 min
+3 dias = 4320 min
+4 dias = 5760 min
+5 dias = 7200 min
+6 dias = 8640 min
+7 dias = 10080 min
+*/
+
+func main() {
+	const (
+		defaultConstraint = 14060.0 //Limit of booking
+	)
+
+	var constraint float64
+	flag.Float64Var(&constraint, "constraint", defaultConstraint, "Constraint value about Rooms")
+	flag.Parse()
+
+	names := []string{
+		"Lolapaluza",
+		"NotreDame",
+		"Shaluna",
+		"LasNoches",
+		"Bienvenue",
+		"Cielo",
+		"Amigos",
+		"Donatello",
+	}
+
+	values := []float64{
+		289.0,
+		190.0,
+		195.0,
+		300.0,
+		130.0,
+		279.0,
+		350.0,
+		110.0,
+	}
+
+	time := []float64{
+		7200.0,
+		2880.0,
+		4320.0,
+		1440.0,
+		5760.0,
+		8640.0,
+		10080.0,
+		2160.0,
+	}
+
+	bookings := BuildBookingOnline(names, values, time)
+
+	RunGluttons(bookings, constraint)
 }
