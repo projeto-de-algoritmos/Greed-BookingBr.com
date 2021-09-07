@@ -61,8 +61,8 @@ func Glutton(items []Booking, maxTime float64, keyString string) ([]Booking, flo
 
 func RunGlutton(items []Booking, constraint float64, keyString string) {
 	taken, val := Glutton(items, constraint, keyString)
-	fmt.Println("Time available for booking =", constraint)
-	fmt.Println("Total time of all selected rooms =", val)
+	fmt.Println("Time available for booking =", constraint, "minutes")
+	fmt.Println("Total time of all selected rooms =", val, "minutes")
 	for idx := range taken {
 
 		fmt.Printf("	%s <%d, %d>\n", taken[idx].name, int32(taken[idx].value), int32(taken[idx].time))
